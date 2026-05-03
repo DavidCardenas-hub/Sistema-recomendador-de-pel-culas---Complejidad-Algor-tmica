@@ -1,0 +1,2 @@
+# Sistema-recomendador-de-pel-culas---Complejidad-Algor-tmica
+Este proyecto consiste en el desarrollo de un motor de recomendación para plataformas de streaming. Mediante el uso de grafos y algoritmos de filtrado colaborativo, el sistema procesa la base de datos de MovieLens para ofrecer sugerencias personalizadas de películas (del año 2000 en adelante) basadas en el historial de consumo de cada usuario.
