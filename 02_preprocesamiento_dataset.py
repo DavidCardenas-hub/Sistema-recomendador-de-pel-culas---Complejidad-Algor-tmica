@@ -1,12 +1,7 @@
 """si les sale error descarguen esto desde el CMD: pip install pandas"""
 # Cargar el dataset con Pandas
 import pandas as pd
-import os
 
-# # Crear la carpeta 'data' si no existe
-# if not os.path.exists('data'):
-#     os.makedirs('data')
-#     print("Carpeta 'data' creada con éxito.")
 
 # 3. Cargar archivos principales
 ratings = pd.read_csv("data/ml-latest-small/ratings.csv")

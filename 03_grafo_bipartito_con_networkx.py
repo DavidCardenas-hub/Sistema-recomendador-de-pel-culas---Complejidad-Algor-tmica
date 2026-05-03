@@ -1,3 +1,7 @@
+# Descargar la extension Jupyter para VSCode si no la tienen
+# Descargar la extension Live Preview for Microsoft Edge para abrir el HTML generado
+# Para ejecutar el html generado, da clic derecho sobre el archivo y selecciona "Open with Live Preview"
+# Para ejecutar este script, abrirlo en VSCode y usar la opción "Run Cell" en cada bloque de código.
 #%%
 # ============================================================
 # Objetivo:
