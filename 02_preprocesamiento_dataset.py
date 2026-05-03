@@ -3,14 +3,14 @@
 import pandas as pd
 import os
 
-# Crear la carpeta 'data' si no existe
-if not os.path.exists('data'):
-    os.makedirs('data')
-    print("Carpeta 'data' creada con éxito.")
+# # Crear la carpeta 'data' si no existe
+# if not os.path.exists('data'):
+#     os.makedirs('data')
+#     print("Carpeta 'data' creada con éxito.")
 
 # 3. Cargar archivos principales
-ratings = pd.read_csv("ml-latest-small/ratings.csv")
-movies = pd.read_csv("ml-latest-small/movies.csv")
+ratings = pd.read_csv("data/ml-latest-small/ratings.csv")
+movies = pd.read_csv("data/ml-latest-small/movies.csv")
 
 """ Lo comentado es para revisar los datos, no es necesario 
 para el proceso de creación del grafo. 
