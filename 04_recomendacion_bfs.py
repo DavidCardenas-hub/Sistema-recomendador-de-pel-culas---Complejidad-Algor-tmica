@@ -15,7 +15,7 @@
 # ============================================================
 # 1. Importar librerías
 # ============================================================
-
+# Descargar desde CMD con el comando: pip install openpyxl , para exportar a Excel con formato.
 import pandas as pd
 import networkx as nx
 from collections import deque, defaultdict
@@ -688,4 +688,115 @@ print("=================================\n")
 recomendaciones.to_csv("data/recomendaciones_bfs.csv", index=False)
 
 print("Recomendaciones guardadas en: data/recomendaciones_bfs.csv")
+# %%
+# ============================================================
+# Exportar recomendaciones a Excel con colores por columna
+# ============================================================
+
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+
+archivo_excel = "data/recomendaciones_bfs.xlsx"
+
+columnas_exportar = [
+    "movie_node",
+    "titulo",
+    "year",
+    "generos",
+    "rating_promedio",
+    "cantidad_votos_similares"
+]
+
+with pd.ExcelWriter(archivo_excel, engine="openpyxl") as writer:
+    recomendaciones[columnas_exportar].to_excel(
+        writer,
+        sheet_name="Recomendaciones",
+        index=False
+    )
+
+    workbook = writer.book
+    worksheet = writer.sheets["Recomendaciones"]
+
+    # Colores de encabezado por columna
+    colores_encabezado = {
+        "A": "404040",  # gris oscuro para movie_node
+        "B": "1F4E78",  # azul
+        "C": "70AD47",  # verde
+        "D": "7030A0",  # morado
+        "E": "C00000",  # rojo
+        "F": "ED7D31",  # naranja
+    }
+
+    # Colores suaves para celdas por columna
+    colores_celdas = {
+        "A": "D9D9D9",  # gris claro
+        "B": "D9EAF7",  # azul claro
+        "C": "E2F0D9",  # verde claro
+        "D": "EADCF8",  # morado claro
+        "E": "F4CCCC",  # rojo claro
+        "F": "FCE4D6",  # naranja claro
+    }
+
+    borde_fino = Side(style="thin", color="BFBFBF")
+    borde = Border(
+        left=borde_fino,
+        right=borde_fino,
+        top=borde_fino,
+        bottom=borde_fino
+    )
+
+    # Formato de encabezados
+    for col in range(1, len(columnas_exportar) + 1):
+        letra_col = get_column_letter(col)
+        celda = worksheet[f"{letra_col}1"]
+
+        celda.fill = PatternFill(
+            start_color=colores_encabezado[letra_col],
+            end_color=colores_encabezado[letra_col],
+            fill_type="solid"
+        )
+        celda.font = Font(color="FFFFFF", bold=True)
+        celda.alignment = Alignment(horizontal="center", vertical="center")
+        celda.border = borde
+
+    # Formato de celdas por columna
+    for row in range(2, worksheet.max_row + 1):
+        for col in range(1, len(columnas_exportar) + 1):
+            letra_col = get_column_letter(col)
+            celda = worksheet[f"{letra_col}{row}"]
+
+            celda.fill = PatternFill(
+                start_color=colores_celdas[letra_col],
+                end_color=colores_celdas[letra_col],
+                fill_type="solid"
+            )
+            celda.border = borde
+            celda.alignment = Alignment(vertical="center", horizontal="center", wrap_text=True)
+
+    # Formato numérico
+    for row in range(2, worksheet.max_row + 1):
+        worksheet[f"E{row}"].number_format = "0.00"  # rating_promedio
+        worksheet[f"F{row}"].number_format = "0"     # cantidad_votos_similares
+
+    # Ajustar ancho de columnas
+    worksheet.column_dimensions["A"].width = 20  # movie_node
+    worksheet.column_dimensions["B"].width = 45  # título
+    worksheet.column_dimensions["C"].width = 12  # año
+    worksheet.column_dimensions["D"].width = 35  # géneros
+    worksheet.column_dimensions["E"].width = 20  # rating promedio
+    worksheet.column_dimensions["F"].width = 30  # cantidad votos
+
+    # Altura de filas
+    worksheet.row_dimensions[1].height = 25
+
+    for row in range(2, worksheet.max_row + 1):
+        worksheet.row_dimensions[row].height = 35
+
+    # Congelar encabezado
+    worksheet.freeze_panes = "A2"
+
+    # Agregar filtro
+    worksheet.auto_filter.ref = worksheet.dimensions
+
+print(f"Archivo Excel generado con colores correctamente: {archivo_excel}")
 # %%
