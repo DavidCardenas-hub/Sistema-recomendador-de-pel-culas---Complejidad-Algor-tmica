@@ -1,11 +1,11 @@
 movie_node,titulo,year,generos,rating_promedio,cantidad_votos_similares
-M_96861,Taken 2 (2012),2012.0,Action|Crime|Drama|Thriller,5.0,2
 M_6888,Scary Movie 3 (2003),2003.0,Comedy|Horror,5.0,2
-M_78836,Enter the Void (2009),2009.0,Drama,5.0,2
-M_121231,It Follows (2014),2014.0,Horror,5.0,2
+M_96861,Taken 2 (2012),2012.0,Action|Crime|Drama|Thriller,5.0,2
 M_128520,The Wedding Ringer (2015),2015.0,Comedy,5.0,2
+M_121231,It Follows (2014),2014.0,Horror,5.0,2
 M_87529,Your Highness (2011),2011.0,Action|Adventure|Comedy|Fantasy,5.0,2
-M_74754,"Room, The (2003)",2003.0,Comedy|Drama|Romance,5.0,2
 M_69069,Fired Up (2009),2009.0,Comedy,5.0,2
+M_74754,"Room, The (2003)",2003.0,Comedy|Drama|Romance,5.0,2
 M_45668,"Lake House, The (2006)",2006.0,Drama|Fantasy|Romance,5.0,2
-M_93272,Dr. Seuss' The Lorax (2012),2012.0,Animation|Fantasy|Musical|IMAX,5.0,1
+M_5048,Snow Dogs (2002),2002.0,Adventure|Children|Comedy,5.0,1
+M_6686,"Medallion, The (2003)",2003.0,Action|Comedy|Crime|Fantasy,5.0,1

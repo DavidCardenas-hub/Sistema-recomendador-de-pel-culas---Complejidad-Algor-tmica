@@ -19,6 +19,13 @@
 import pandas as pd
 import networkx as nx
 from collections import deque, defaultdict
+from pyvis.network import Network
+
+try:
+    from IPython.display import IFrame
+    USAR_IFRAME = True
+except ImportError:
+    USAR_IFRAME = False
 
 #%%
 # ============================================================
@@ -228,10 +235,379 @@ print("\n========== RECOMENDACIONES ==========")
 print(recomendaciones)
 print("=====================================\n")
 
+#%%
+# ============================================================
+# 8. Visualización interactiva del proceso de recomendación
+# ============================================================
+
+def crear_grafo_recomendacion_pyvis(
+    G,
+    usuario_objetivo,
+    recomendaciones_df,
+    rating_min=4.0,
+    max_peliculas_usuario=8,
+    max_peliculas_no_recomendadas_por_usuario=2,
+    archivo_html="grafo_recomendacion_bfs.html"
+):
+    """
+    Crea una visualización interactiva conectada del proceso de recomendación BFS.
+
+    Esta versión evita islas:
+    - No agrega usuarios solos.
+    - No agrega películas solas.
+    - Todas las recomendaciones rojas se intentan conectar mediante un camino real:
+
+      Usuario objetivo -> Película positiva en común -> Usuario similar -> Película recomendada
+
+    Colores:
+    - Usuario objetivo: naranja
+    - Películas positivas del usuario objetivo: verde
+    - Usuarios similares: celeste
+    - Películas recomendadas: rojo
+    - Películas no recomendadas: gris oscuro
+    """
+
+    # ------------------------------------------------------------
+    # 8.1. Obtener películas del usuario objetivo
+    # ------------------------------------------------------------
+
+    peliculas_usuario = {
+        p for p in G.neighbors(usuario_objetivo)
+        if G.nodes[p]["tipo"] == "pelicula"
+    }
+
+    peliculas_positivas_usuario = []
+
+    for pelicula in peliculas_usuario:
+        rating = obtener_rating(G, usuario_objetivo, pelicula)
+
+        if rating >= rating_min:
+            peliculas_positivas_usuario.append(pelicula)
+
+    # ------------------------------------------------------------
+    # 8.2. Obtener películas recomendadas desde recomendaciones_df
+    # ------------------------------------------------------------
+
+    peliculas_recomendadas = []
+
+    if recomendaciones_df is not None and not recomendaciones_df.empty:
+        peliculas_recomendadas = list(recomendaciones_df["movie_node"].astype(str))
+
+    print("Películas recomendadas que se mostrarán en rojo:", len(peliculas_recomendadas))
+
+    # ------------------------------------------------------------
+    # 8.3. Crear red interactiva
+    # ------------------------------------------------------------
+
+    net = Network(
+        notebook=True,
+        cdn_resources="in_line",
+        height="800px",
+        width="100%",
+        bgcolor="#ffffff",
+        font_color="black"
+    )
+
+    # ------------------------------------------------------------
+    # 8.4. Funciones auxiliares
+    # ------------------------------------------------------------
+
+    nodos_agregados = set()
+    aristas_agregadas = set()
+
+    def agregar_arista(u, v, label, title, color):
+        clave = tuple(sorted([u, v]))
+
+        if clave not in aristas_agregadas:
+            net.add_edge(
+                u,
+                v,
+                label=str(label),
+                title=title,
+                color=color
+            )
+            aristas_agregadas.add(clave)
+
+    def agregar_usuario_objetivo():
+        if usuario_objetivo not in nodos_agregados:
+            net.add_node(
+                usuario_objetivo,
+                label=usuario_objetivo,
+                title="Usuario objetivo",
+                color="orange",
+                size=34
+            )
+            nodos_agregados.add(usuario_objetivo)
+
+    def agregar_pelicula_positiva(pelicula):
+        if pelicula not in nodos_agregados:
+            datos = G.nodes[pelicula]
+            titulo = datos.get("titulo", pelicula)
+            year = datos.get("year", "")
+            generos = datos.get("generos", "")
+            rating = obtener_rating(G, usuario_objetivo, pelicula)
+
+            net.add_node(
+                pelicula,
+                label=titulo,
+                title=(
+                    f"Película positiva del usuario objetivo\n"
+                    f"Título: {titulo}\n"
+                    f"Año: {year}\n"
+                    f"Géneros: {generos}\n"
+                    f"Rating del usuario objetivo: {rating}"
+                ),
+                color="lightgreen",
+                size=22
+            )
+            nodos_agregados.add(pelicula)
+
+        rating_objetivo = obtener_rating(G, usuario_objetivo, pelicula)
+
+        agregar_arista(
+            usuario_objetivo,
+            pelicula,
+            rating_objetivo,
+            f"Rating del usuario objetivo: {rating_objetivo}",
+            "green"
+        )
+
+    def agregar_usuario_similar(usuario):
+        if usuario not in nodos_agregados:
+            net.add_node(
+                usuario,
+                label=usuario,
+                title="Usuario similar",
+                color="lightblue",
+                size=18
+            )
+            nodos_agregados.add(usuario)
+
+    def agregar_pelicula_recomendada(pelicula):
+        if pelicula not in nodos_agregados:
+            datos = G.nodes[pelicula]
+            titulo = datos.get("titulo", pelicula)
+            year = datos.get("year", "")
+            generos = datos.get("generos", "")
+
+            fila_rec = recomendaciones_df[
+                recomendaciones_df["movie_node"].astype(str) == pelicula
+            ]
+
+            if not fila_rec.empty:
+                rating_promedio = fila_rec.iloc[0].get("rating_promedio", "")
+                votos = fila_rec.iloc[0].get("cantidad_votos_similares", "")
+            else:
+                rating_promedio = ""
+                votos = ""
+
+            net.add_node(
+                pelicula,
+                label=titulo,
+                title=(
+                    f"PELÍCULA RECOMENDADA\n"
+                    f"Título: {titulo}\n"
+                    f"Año: {year}\n"
+                    f"Géneros: {generos}\n"
+                    f"Rating promedio: {rating_promedio}\n"
+                    f"Votos de usuarios similares: {votos}"
+                ),
+                color="red",
+                size=30
+            )
+            nodos_agregados.add(pelicula)
+
+    def agregar_pelicula_no_recomendada(pelicula):
+        if pelicula not in nodos_agregados:
+            datos = G.nodes[pelicula]
+            titulo = datos.get("titulo", pelicula)
+            year = datos.get("year", "")
+            generos = datos.get("generos", "")
+
+            net.add_node(
+                pelicula,
+                label=titulo,
+                title=(
+                    f"Película no recomendada\n"
+                    f"Título: {titulo}\n"
+                    f"Año: {year}\n"
+                    f"Géneros: {generos}\n"
+                    f"Motivo: rating menor a {rating_min}"
+                ),
+                color="darkgray",
+                size=15
+            )
+            nodos_agregados.add(pelicula)
+
+    # ------------------------------------------------------------
+    # 8.5. Agregar usuario objetivo
+    # ------------------------------------------------------------
+
+    agregar_usuario_objetivo()
+
+    # ------------------------------------------------------------
+    # 8.6. Construir caminos conectados para todas las recomendaciones
+    # ------------------------------------------------------------
+
+    usuarios_conectados = set()
+    peliculas_puente_conectadas = set()
+
+    for pelicula_recomendada in peliculas_recomendadas:
+
+        if pelicula_recomendada not in G:
+            continue
+
+        camino_encontrado = False
+
+        # Buscar un usuario que calificó positivamente la película recomendada
+        for usuario_similar in G.neighbors(pelicula_recomendada):
+
+            if G.nodes[usuario_similar]["tipo"] != "usuario":
+                continue
+
+            rating_recomendada = obtener_rating(G, usuario_similar, pelicula_recomendada)
+
+            if rating_recomendada < rating_min:
+                continue
+
+            # Buscar una película puente:
+            # debe estar calificada positivamente por el usuario objetivo
+            # y también positivamente por el usuario similar.
+            for pelicula_puente in peliculas_positivas_usuario:
+
+                if not G.has_edge(usuario_similar, pelicula_puente):
+                    continue
+
+                rating_objetivo = obtener_rating(G, usuario_objetivo, pelicula_puente)
+                rating_similar_puente = obtener_rating(G, usuario_similar, pelicula_puente)
+
+                if rating_objetivo >= rating_min and rating_similar_puente >= rating_min:
+
+                    # Agregar camino completo:
+                    # Usuario objetivo -> Película puente -> Usuario similar -> Película recomendada
+                    agregar_pelicula_positiva(pelicula_puente)
+                    agregar_usuario_similar(usuario_similar)
+                    agregar_pelicula_recomendada(pelicula_recomendada)
+
+                    agregar_arista(
+                        pelicula_puente,
+                        usuario_similar,
+                        rating_similar_puente,
+                        f"Rating del usuario similar: {rating_similar_puente}",
+                        "blue"
+                    )
+
+                    agregar_arista(
+                        usuario_similar,
+                        pelicula_recomendada,
+                        rating_recomendada,
+                        f"Rating positivo de {usuario_similar}: {rating_recomendada}",
+                        "red"
+                    )
+
+                    usuarios_conectados.add(usuario_similar)
+                    peliculas_puente_conectadas.add(pelicula_puente)
+
+                    camino_encontrado = True
+                    break
+
+            if camino_encontrado:
+                break
+
+        if not camino_encontrado:
+            print(
+                f"Advertencia: no se pudo conectar visualmente la recomendación {pelicula_recomendada}"
+            )
+
+    # ------------------------------------------------------------
+    # 8.7. Agregar algunas películas positivas adicionales del usuario objetivo
+    #      solo conectadas al usuario objetivo, para contexto visual
+    # ------------------------------------------------------------
+
+    contador_contexto = 0
+
+    for pelicula in peliculas_positivas_usuario:
+
+        if contador_contexto >= max_peliculas_usuario:
+            break
+
+        if pelicula not in peliculas_puente_conectadas:
+            agregar_pelicula_positiva(pelicula)
+            contador_contexto += 1
+
+    # ------------------------------------------------------------
+    # 8.8. Agregar películas no recomendadas en gris oscuro
+    #      solo desde usuarios ya conectados
+    # ------------------------------------------------------------
+
+    peliculas_recomendadas_set = set(peliculas_recomendadas)
+
+    for usuario in usuarios_conectados:
+        contador_grises = 0
+
+        for pelicula in G.neighbors(usuario):
+
+            if G.nodes[pelicula]["tipo"] != "pelicula":
+                continue
+
+            # No mostrar películas ya calificadas por el usuario objetivo
+            if pelicula in peliculas_usuario:
+                continue
+
+            # No mostrar recomendaciones como grises
+            if pelicula in peliculas_recomendadas_set:
+                continue
+
+            rating = obtener_rating(G, usuario, pelicula)
+
+            # Solo se muestran películas no recomendadas con rating bajo
+            if rating >= rating_min:
+                continue
+
+            if contador_grises >= max_peliculas_no_recomendadas_por_usuario:
+                break
+
+            agregar_pelicula_no_recomendada(pelicula)
+
+            agregar_arista(
+                usuario,
+                pelicula,
+                rating,
+                f"Rating otorgado por {usuario}: {rating}",
+                "darkgray"
+            )
+
+            contador_grises += 1
+
+    # ------------------------------------------------------------
+    # 8.9. Guardar HTML
+    # ------------------------------------------------------------
+
+    net.toggle_physics(True)
+
+    html_content = net.generate_html()
+
+    with open(archivo_html, mode="w", encoding="utf-8") as f:
+        f.write(html_content)
+
+    print(f"Grafo interactivo de recomendación generado: {archivo_html}")
+
+    if USAR_IFRAME:
+        return IFrame(archivo_html, width=1000, height=800)
+
+crear_grafo_recomendacion_pyvis(
+    G,
+    usuario_objetivo=usuario_objetivo,
+    recomendaciones_df=recomendaciones,
+    rating_min=4.0,
+    max_peliculas_usuario=8,
+    max_peliculas_no_recomendadas_por_usuario=2,
+    archivo_html="grafo_recomendacion_bfs.html"
+)
 
 #%%
 # ============================================================
-# 8. Mostrar explicación del recorrido BFS aplicado
+# 9. Mostrar explicación del recorrido BFS aplicado
 # ============================================================
 
 print("Interpretación del recorrido BFS aplicado:")
@@ -243,7 +619,7 @@ print("Nivel 3: Películas candidatas calificadas positivamente por usuarios sim
 
 #%%
 # ============================================================
-# 9. Implementación explícita de BFS hasta profundidad 3
+# 10. Implementación explícita de BFS hasta profundidad 3
 # ============================================================
 
 def bfs_limitado(G, inicio, profundidad_max=3):
@@ -306,7 +682,7 @@ print("=================================\n")
 
 #%%
 # ============================================================
-# 10. Guardar recomendaciones en CSV
+# 11. Guardar recomendaciones en CSV
 # ============================================================
 
 recomendaciones.to_csv("data/recomendaciones_bfs.csv", index=False)

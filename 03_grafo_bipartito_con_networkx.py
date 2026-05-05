@@ -2,6 +2,7 @@
 # Descargar la extension Live Preview for Microsoft Edge para abrir el HTML generado
 # Para ejecutar el html generado, da clic derecho sobre el archivo y selecciona "Open with Live Preview"
 # Para ejecutar este script, abrirlo en VSCode y usar la opción "Run Cell" en cada bloque de código.
+# Descargar pip install networkx si no lo tienen instalado.
 #%%
 # ============================================================
 # Objetivo:
@@ -204,7 +205,7 @@ for pelicula in peliculas_nivel1:
         if vecino != usuario_objetivo and G.nodes[vecino]["tipo"] == "usuario":
             usuarios_nivel2.add(vecino)
 
-usuarios_nivel2 = list(usuarios_nivel2)[:30]
+usuarios_nivel2 = list(usuarios_nivel2)[:30] # Tomamos solo las primeras 30 para no saturar la visualización
 
 # Nodos que se mostrarán en la visualización
 nodos_colaborativos = [usuario_objetivo] + peliculas_nivel1 + usuarios_nivel2
@@ -297,18 +298,18 @@ for nodo in list(G.nodes())[:5]:
 
 print("====================================================\n")
 
+# #%%
+# # ============================================================
+# # 11. OPCIONAL: Intentar visualizar el grafo completo
+# # ============================================================
 
-# ============================================================
-# 11. OPCIONAL: Intentar visualizar el grafo completo
-# ============================================================
-
-# IMPORTANTE:
-# No se recomienda activar este bloque para el informe principal.
-# El grafo completo puede tener más de 2500 nodos y muchas aristas,
-# por lo que el archivo HTML puede ser pesado y difícil de interpretar.
-#
-# Si el profesor pide ver el grafo completo, se puede descomentar
-# este bloque y probarlo.
+# # IMPORTANTE:
+# # No se recomienda activar este bloque para el informe principal.
+# # El grafo completo puede tener más de 2500 nodos y muchas aristas,
+# # por lo que el archivo HTML puede ser pesado y difícil de interpretar.
+# #
+# # Si el profesor pide ver el grafo completo, se puede descomentar
+# # este bloque y probarlo.
 
 
 # net_completo = Network(
@@ -355,10 +356,14 @@ print("====================================================\n")
 
 # net_completo.toggle_physics(True)
 
-# archivo_completo = "grafo_completo_2500_nodos.html"
-# net_completo.show(archivo_completo)
+# archivo_completo = "grafo_completo_3000_nodos.html"
+# html_content = net_completo.generate_html()
+# with open(archivo_completo, mode='w', encoding='utf-8') as f:
+#     f.write(html_content)
 
 # print(f"Grafo completo generado: {archivo_completo}")
 
 # if USAR_IFRAME:
 #     IFrame(archivo_completo, width=1000, height=800)
+
+# # %%
