@@ -63,21 +63,46 @@ Las técnicas y conceptos principales utilizados son:
 - grafo_colaborativo.html
 - grafo_recomendacion_bfs.html
 ---
-## Librerías utilizadas y comando de instalación
+## Librerías utilizadas
 
-- pandas
-- networkx
-- matplotlib
-- pyvis
-- openpyxl
-```text
-    pip install pandas networkx matplotlib pyvis openpyxl
+Para ejecutar el proyecto se requieren las siguientes librerías de Python:
+
+- `pandas`
+- `numpy`
+- `networkx`
+- `matplotlib`
+- `pyvis`
+- `openpyxl`
+- `ipykernel`
+
+Instalación manual:
+
+```bash
+pip install pandas numpy networkx matplotlib pyvis openpyxl ipykernel
+```
+---
+```markdown
+## Extensiones recomendadas para Visual Studio Code
+
+Estas extensiones no son obligatorias, pero facilitan la ejecución y visualización del proyecto:
+
+- Python
+- Jupyter
+- Live Preview
+
+Se pueden instalar desde la pestaña de extensiones de Visual Studio Code. También pueden instalarse desde la terminal con los siguientes comandos:
+
+```bash
+code --install-extension ms-python.python
+code --install-extension ms-toolsai.jupyter
+code --install-extension ms-vscode.live-server
 ```
 ---
 ## Ejecución del proyecto
 
 Ejecutar los scripts en el siguiente orden:
-```text
+
+```bash
 python 01_descarga_dataset.py
 python 02_preprocesamiento_dataset.py
 python 03_grafo_bipartito_con_networkx.py

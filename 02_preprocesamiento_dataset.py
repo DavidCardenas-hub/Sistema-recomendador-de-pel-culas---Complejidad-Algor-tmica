@@ -1,4 +1,4 @@
-"""si les sale error descarguen esto desde el CMD: pip install pandas"""
+
 #%%
 # ============================================================
 # Objetivo:
