@@ -8,6 +8,8 @@ El sistema trabaja con películas estrenadas desde el año 2000 en adelante y ut
 
 La recomendación se basa en la idea de que usuarios con gustos similares pueden servir como referencia para sugerir nuevas películas. Si un usuario calificó positivamente una película, el sistema busca otros usuarios que también calificaron positivamente esa misma película. Luego, analiza otras películas bien calificadas por esos usuarios similares y las propone como recomendaciones.
 
+Para el uso de imágenes se usó TMDB (https://www.themoviedb.org/)
+
 ---
 
 ## Curso y grupo
