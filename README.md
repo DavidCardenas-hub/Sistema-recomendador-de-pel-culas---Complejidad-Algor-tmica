@@ -62,6 +62,7 @@ Las técnicas y conceptos principales utilizados son:
 - data/grafo_bipartito_peliculas.gml
 - grafo_colaborativo.html
 - grafo_recomendacion_bfs.html
+- Interfaz gráfica ejecutable desde `A6_interfaz_usuario.py`
 ---
 ## Librerías utilizadas
 
@@ -74,11 +75,14 @@ Para ejecutar el proyecto se requieren las siguientes librerías de Python:
 - `pyvis`
 - `openpyxl`
 - `ipykernel`
+- `customtkinter`
+- `requests`
+- `pillow`
 
 Instalación manual:
 
 ```bash
-pip install pandas numpy networkx matplotlib pyvis openpyxl ipykernel
+pip install pandas numpy networkx matplotlib pyvis openpyxl ipykernel customtkinter requests pillow
 ```
 ---
 ```markdown
@@ -107,6 +111,8 @@ python 01_descarga_dataset.py
 python 02_preprocesamiento_dataset.py
 python 03_grafo_bipartito_con_networkx.py
 python 04_recomendacion_bfs.py
+python A5_obtener_posters_recomendacion.py
+python A6_interfaz_usuario.py
 ```
 ---
 ## Estructura del proyecto
@@ -130,6 +136,8 @@ Sistema-recomendador-de-peliculas/
 ├── 02_preprocesamiento_dataset.py
 ├── 03_grafo_bipartito_con_networkx.py
 ├── 04_recomendacion_bfs.py
+├── A5_obtener_posters_recomendacion.py
+├── A6_interfaz_usuario.py
 │
 ├── grafo_colaborativo.html
 ├── grafo_recomendacion_bfs.html

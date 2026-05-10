@@ -16,7 +16,10 @@ librerias = {
     "matplotlib": "matplotlib",
     "pyvis": "pyvis",
     "openpyxl": "openpyxl",
-    "ipykernel": "ipykernel"
+    "ipykernel": "ipykernel",
+    "customtkinter": "customtkinter",  # Para la interfaz
+    "requests": "requests",            # Para las consultas a la API de TMDB
+    "PIL": "pillow"                    # Para el manejo de imágenes y logos
 }
 
 def instalar_si_falta(paquete_import, paquete_pip):
