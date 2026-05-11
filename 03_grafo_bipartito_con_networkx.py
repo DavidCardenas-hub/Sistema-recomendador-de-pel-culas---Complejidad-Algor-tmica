@@ -2,7 +2,6 @@
 # Descargar la extension Live Preview for Microsoft Edge para abrir el HTML generado
 # Para ejecutar el html generado, da clic derecho sobre el archivo y selecciona "Open with Live Preview"
 # Para ejecutar este script, abrirlo en VSCode y usar la opción "Run Cell" en cada bloque de código.
-# Descargar pip install networkx si no lo tienen instalado.
 #%%
 # ============================================================
 # Objetivo:
@@ -19,10 +18,7 @@
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
-# Si no tienen PyVis instalado, ejecutar en la terminal:
-# pip install pyvis
-# En Google Colab sería:
-# !pip install pyvis
+
 
 from pyvis.network import Network
 

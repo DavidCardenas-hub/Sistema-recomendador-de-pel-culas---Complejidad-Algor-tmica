@@ -1,11 +1,51 @@
+# ============================================================
+# Verificación e instalación de librerías necesarias
+# ============================================================
 import os
 import zipfile
 import urllib.request
+
+import importlib
+import subprocess
+import sys
+
+librerias = {
+    "pandas": "pandas",
+    "numpy": "numpy",
+    "networkx": "networkx",
+    "matplotlib": "matplotlib",
+    "pyvis": "pyvis",
+    "openpyxl": "openpyxl",
+    "ipykernel": "ipykernel",
+    "customtkinter": "customtkinter",  # Para la interfaz
+    "requests": "requests",            # Para las consultas a la API de TMDB
+    "PIL": "pillow"                    # Para el manejo de imágenes y logos
+}
+
+def instalar_si_falta(paquete_import, paquete_pip):
+    try:
+        importlib.import_module(paquete_import)
+        print(f"{paquete_pip} ya está instalado.")
+    except ImportError:
+        print(f"{paquete_pip} no está instalado. Instalando...")
+        subprocess.check_call([
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            paquete_pip
+        ])
+        print(f"{paquete_pip} instalado correctamente.")
+
+for paquete_import, paquete_pip in librerias.items():
+    instalar_si_falta(paquete_import, paquete_pip)
+
 
 # ============================================================
 # CONFIGURACIÓN INICIAL DE DIRECTORIOS
 # ============================================================
 # Definimos 'data' como la carpeta base del proyecto
+
 if not os.path.exists('data'):
     os.makedirs('data')
     print("Carpeta 'data' creada con éxito.")

@@ -8,6 +8,8 @@ El sistema trabaja con películas estrenadas desde el año 2000 en adelante y ut
 
 La recomendación se basa en la idea de que usuarios con gustos similares pueden servir como referencia para sugerir nuevas películas. Si un usuario calificó positivamente una película, el sistema busca otros usuarios que también calificaron positivamente esa misma película. Luego, analiza otras películas bien calificadas por esos usuarios similares y las propone como recomendaciones.
 
+Para el uso de imágenes se usó TMDB (https://www.themoviedb.org/)
+
 ---
 
 ## Curso y grupo
@@ -62,26 +64,57 @@ Las técnicas y conceptos principales utilizados son:
 - data/grafo_bipartito_peliculas.gml
 - grafo_colaborativo.html
 - grafo_recomendacion_bfs.html
+- Interfaz gráfica ejecutable desde `A6_interfaz_usuario.py`
 ---
-## Librerías utilizadas y comando de instalación
+## Librerías utilizadas
 
-- pandas
-- networkx
-- matplotlib
-- pyvis
-- openpyxl
-```text
-    pip install pandas networkx matplotlib pyvis openpyxl
+Para ejecutar el proyecto se requieren las siguientes librerías de Python:
+
+- `pandas`
+- `numpy`
+- `networkx`
+- `matplotlib`
+- `pyvis`
+- `openpyxl`
+- `ipykernel`
+- `customtkinter`
+- `requests`
+- `pillow`
+
+Instalación manual:
+
+```bash
+pip install pandas numpy networkx matplotlib pyvis openpyxl ipykernel customtkinter requests pillow
+```
+---
+```markdown
+## Extensiones recomendadas para Visual Studio Code
+
+Estas extensiones no son obligatorias, pero facilitan la ejecución y visualización del proyecto:
+
+- Python
+- Jupyter
+- Live Preview
+
+Se pueden instalar desde la pestaña de extensiones de Visual Studio Code. También pueden instalarse desde la terminal con los siguientes comandos:
+
+```bash
+code --install-extension ms-python.python
+code --install-extension ms-toolsai.jupyter
+code --install-extension ms-vscode.live-server
 ```
 ---
 ## Ejecución del proyecto
 
 Ejecutar los scripts en el siguiente orden:
-```text
+
+```bash
 python 01_descarga_dataset.py
 python 02_preprocesamiento_dataset.py
 python 03_grafo_bipartito_con_networkx.py
 python 04_recomendacion_bfs.py
+python A5_obtener_posters_recomendacion.py
+python A6_interfaz_usuario.py
 ```
 ---
 ## Estructura del proyecto
@@ -105,6 +138,8 @@ Sistema-recomendador-de-peliculas/
 ├── 02_preprocesamiento_dataset.py
 ├── 03_grafo_bipartito_con_networkx.py
 ├── 04_recomendacion_bfs.py
+├── A5_obtener_posters_recomendacion.py
+├── A6_interfaz_usuario.py
 │
 ├── grafo_colaborativo.html
 ├── grafo_recomendacion_bfs.html
