@@ -2,6 +2,7 @@ import customtkinter as ctk
 from PIL import Image, ImageTk # Para manejar las imágenes 
 import requests
 import io
+import threading  # <--- Hilos integrados para segundo plano
 from A5_obtener_posters_recomendacion import cargar_recursos, obtener_recomendaciones_interactivas, obtener_url_poster
 
 class AppRecomendacion(ctk.CTk):
@@ -72,15 +73,43 @@ class AppRecomendacion(ctk.CTk):
         except:
             return None
 
+    def iniciar_descarga_async(self, url, label_widget):
+        """Crea un hilo para descargar la imagen sin congelar la interfaz."""
+        def worker():
+            ctk_img = self.descargar_imagen(url)
+            # Verificamos de forma segura si el label aún existe en pantalla
+            if label_widget.winfo_exists():
+                if ctk_img:
+                    # .after manda la instrucción al hilo principal de Tkinter de forma segura
+                    self.after(0, lambda: label_widget.configure(image=ctk_img, text=""))
+                else:
+                    self.after(0, lambda: label_widget.configure(text="🎬\n(No disponible)"))
+        
+        # daemon=True hace que los hilos se cierren automáticamente si cierras la app
+        hilo = threading.Thread(target=worker, daemon=True)
+        hilo.start()
+    
     def buscar_pelicula(self):
         """Busca películas y muestra su póster si está disponible[cite: 174, 283]."""
         for widget in self.scroll_resultados.winfo_children():
             widget.destroy()
 
         query = self.entry_busqueda.get().lower()
-        if len(query) < 2: return
+        if len(query) < 2:
+            ctk.CTkLabel(self.scroll_resultados, 
+                         text="⚠️ Escribe al menos 2 caracteres para buscar.", 
+                         font=("Segoe UI", 12, "italic"),
+                         text_color="gray").pack(pady=20)
+            return
 
-        resultados = self.df_movies[self.df_movies['title'].str.lower().str.contains(query)].head(10)
+        resultados = self.df_movies[self.df_movies['title'].str.lower().str.contains(query)].head(15)
+        # Si no hay resultados, mostramos un mensaje amigable en lugar de una pantalla vacía
+        if resultados.empty:
+            ctk.CTkLabel(self.scroll_resultados, 
+                         text="❌ No se encontraron coincidencias.\nEsta película no existe en el catálogo.", 
+                         font=("Segoe UI", 13, "bold"),
+                         text_color="#ff4444").pack(pady=20)
+            return
 
         for _, row in resultados.iterrows():
             # Buscar el tmdbId usando el movieId [cite: 276]
@@ -88,15 +117,23 @@ class AppRecomendacion(ctk.CTk):
             
             frame_item = ctk.CTkFrame(self.scroll_resultados)
             frame_item.pack(pady=5, fill="x", padx=5)
+            
+            # Creamos el Label de la imagen inmediatamente con un texto temporal de carga
+            lbl_img = ctk.CTkLabel(frame_item, text="⌛ Cargando...")
+            lbl_img.pack(side="top", pady=5)
 
             # Intentar cargar imagen 
             if not link_row.empty:
                 tmdb_id = link_row.iloc[0]['tmdbId']
                 url = obtener_url_poster(tmdb_id)
-                ctk_img = self.descargar_imagen(url)
-                if ctk_img:
-                    lbl_img = ctk.CTkLabel(frame_item, image=ctk_img, text="")
-                    lbl_img.pack(side="top", pady=5)
+                self.iniciar_descarga_async(url, lbl_img)
+            else:
+                lbl_img.configure(text="🎬\n(Sin link)")
+                
+                # ctk_img = self.descargar_imagen(url)
+                # if ctk_img:
+                #     lbl_img = ctk.CTkLabel(frame_item, image=ctk_img, text="")
+                #     lbl_img.pack(side="top", pady=5)
 
             btn = ctk.CTkButton(frame_item, text=f"{row['title']}", 
                                command=lambda r=row: self.agregar_a_calificaciones(r))
@@ -155,16 +192,21 @@ class AppRecomendacion(ctk.CTk):
 
                 # --- BLOQUE DE IMAGEN ---
                 # Buscar el tmdbId en el mapeo de links usando el movieId[cite: 276, 291]
+                lbl_img = ctk.CTkLabel(f, text="⌛ Cargando...")
+                lbl_img.pack(side="top", pady=5)
                 link_row = self.df_links[self.df_links['movieId'] == row['movieId']]
                 if not link_row.empty:
                     tmdb_id = link_row.iloc[0]['tmdbId']
                     # Consultar URL a la API de TMDB[cite: 142, 369]
                     url = obtener_url_poster(tmdb_id)
                     # Descargar y convertir imagen para CustomTkinter[cite: 283, 370]
-                    ctk_img = self.descargar_imagen(url)
-                    if ctk_img:
-                        lbl_img = ctk.CTkLabel(f, image=ctk_img, text="")
-                        lbl_img.pack(side="top", pady=5)
+                    self.iniciar_descarga_async(url, lbl_img)
+                else:
+                    lbl_img.configure(text="🎬")
+                    # ctk_img = self.descargar_imagen(url)
+                    # if ctk_img:
+                    #     lbl_img = ctk.CTkLabel(f, image=ctk_img, text="")
+                    #     lbl_img.pack(side="top", pady=5)
 
                 # --- BLOQUE DE TEXTO ---
                 ctk.CTkLabel(f, text=f"{row['titulo']}", font=("Segoe UI", 13, "bold"), wraplength=250).pack()
