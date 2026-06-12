@@ -1,8 +1,7 @@
-@'
-node_modules
-.next
-out
+node_modules/
+.next/
+out/
 .env
 .env.local
-.vercel
-'@ | Set-Content "web\.gitignore"
+.vercel/
+package-lock.json
