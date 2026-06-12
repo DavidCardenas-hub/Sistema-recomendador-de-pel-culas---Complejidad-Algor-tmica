@@ -2,6 +2,11 @@
   "name": "sistema-recomendador-web",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@11.5.2",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=11.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -1,0 +1,12 @@
+﻿pandas
+numpy
+networkx
+matplotlib
+pyvis
+openpyxl
+ipykernel
+customtkinter
+requests
+pillow
+fastapi
+uvicorn
